@@ -7,9 +7,11 @@ JUNGLE =
   height: 10
 ENERGY = 200
 DISP_EMPTY = " "
-DISP_PLANT = "*"
-DISP_ANIMAL = "M"
+DISP_PLANT = "<span style='color: blue;'>*</span>"
+DISP_ANIMAL = "<span style='color: green;'>M︎</span>"
+DISP_ANIMAL_LOW = "<span style='color: red;'>M︎</span>"
 TIMER = undefined
+INTERVAL = 1000
 
 world = []
 plants = []
@@ -45,12 +47,15 @@ draw_world = ->
       if plants[[x, y]]
         world[[x, y]] = "plant"
   for animal in animals
-    world[[animal.x, animal.y]] = "animal"
+    world[[animal.x, animal.y]] = "animal_low" if animal.energy <= 80
+    world[[animal.x, animal.y]] = "animal" if 80 < animal.energy
+
   ary = []
   for y in [0...WORLD_HEIGHT]
     for x in [0...WORLD_WIDTH]
       switch world[[x, y]]
         when "animal" then ary.push(DISP_ANIMAL)
+        when "animal_low" then ary.push(DISP_ANIMAL_LOW)
         when "plant" then ary.push(DISP_PLANT)
         else ary.push(DISP_EMPTY)
     ary.push("\n")
@@ -134,17 +139,16 @@ class Animal
     child_genes[random_int(0, 8)] += random_int(-1, 2)
     animals.push(new Animal(@x, @y, @direction, child_genes, @energy))
 
-
 auto_simulate_handler = ->
   if $("input_auto").checked
-    TIMER = setInterval (-> skip_day($("input_days").value)), 1000
+    TIMER = setInterval (-> skip_day($("input_days").value)), INTERVAL
   else
     clearInterval TIMER
 
 window.onload = ->
   console.log "loaded"
   first_genes = (random_int(1, 10) for i in [0...8])
-  animals.push(new Animal(50, 15, 0, first_genes, ENERGY))
+  animals.push(new Animal(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0, first_genes, ENERGY))
   draw_world()
   $("simulate_btn").addEventListener "click", (e) =>
     skip_day($("input_days").value)
