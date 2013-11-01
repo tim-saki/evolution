@@ -5,6 +5,7 @@ JUNGLE =
   y: 10
   width: 10
   height: 10
+ENERGY = 200
 DISP_EMPTY = " "
 DISP_PLANT = "*"
 DISP_ANIMAL = "M"
@@ -24,6 +25,8 @@ skip_day = ->
 update_world = ->
   add_plants()
   for animal in animals
+    if animal.energy <= 0
+      animals.splice(animals.indexOf(animal), 1)
     animal.eat()
     animal.turn()
     animal.move()
@@ -84,7 +87,7 @@ sum_array = (ary) ->
   sum
 
 class Animal
-  constructor: (@x, @y, @direction, @genes) ->
+  constructor: (@x, @y, @direction, @genes, @energy) ->
   move: ->
     @x += dist_x_by_dir[@direction]
     @y += dist_y_by_dir[@direction]
@@ -92,6 +95,7 @@ class Animal
     if WORLD_WIDTH <= @x then @x -= WORLD_WIDTH
     if @y < 0 then @y += WORLD_HEIGHT
     if WORLD_HEIGHT <= @y then @y -= WORLD_HEIGHT
+    @energy -= 1
   turn: ->
     thresholds = []
     thresholds[i] = sum_array(@genes.slice(0, i+1)) for i in [0...8]
@@ -116,10 +120,11 @@ class Animal
   eat: ->
     if plants[[@x, @y]]
       plants[[@x, @y]] = undefined
+      @energy += 80
 
 window.onload = ->
   console.log "loaded"
   first_genes = (random_int(1, 10) for i in [0...8])
-  animals.push(new Animal(50, 15, 0, first_genes))
+  animals.push(new Animal(50, 15, 0, first_genes, ENERGY))
   draw_world()
   $("simulate_btn").addEventListener "click", skip_day
