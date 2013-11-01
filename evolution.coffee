@@ -24,6 +24,7 @@ skip_day = ->
 update_world = ->
   add_plants()
   for animal in animals
+    animal.eat()
     animal.turn()
     animal.move()
 
@@ -112,6 +113,9 @@ class Animal
       @direction = 6
     else if rand <= thresholds[7]
       @direction = 7
+  eat: ->
+    if plants[[@x, @y]]
+      plants[[@x, @y]] = undefined
 
 window.onload = ->
   console.log "loaded"

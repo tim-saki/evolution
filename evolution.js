@@ -41,6 +41,7 @@
     _results = [];
     for (_i = 0, _len = animals.length; _i < _len; _i++) {
       animal = animals[_i];
+      animal.eat();
       animal.turn();
       _results.push(animal.move());
     }
@@ -179,6 +180,12 @@
         return this.direction = 6;
       } else if (rand <= thresholds[7]) {
         return this.direction = 7;
+      }
+    };
+
+    Animal.prototype.eat = function() {
+      if (plants[[this.x, this.y]]) {
+        return plants[[this.x, this.y]] = void 0;
       }
     };
 
