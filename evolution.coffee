@@ -9,6 +9,7 @@ ENERGY = 200
 DISP_EMPTY = " "
 DISP_PLANT = "*"
 DISP_ANIMAL = "M"
+TIMER = undefined
 
 world = []
 plants = []
@@ -133,6 +134,13 @@ class Animal
     child_genes[random_int(0, 8)] += random_int(-1, 2)
     animals.push(new Animal(@x, @y, @direction, child_genes, @energy))
 
+
+auto_simulate_handler = ->
+  if $("input_auto").checked
+    TIMER = setInterval (-> skip_day($("input_days").value)), 1000
+  else
+    clearInterval TIMER
+
 window.onload = ->
   console.log "loaded"
   first_genes = (random_int(1, 10) for i in [0...8])
@@ -140,3 +148,5 @@ window.onload = ->
   draw_world()
   $("simulate_btn").addEventListener "click", (e) =>
     skip_day($("input_days").value)
+  $("input_auto").addEventListener "change", (e) =>
+    auto_simulate_handler()
