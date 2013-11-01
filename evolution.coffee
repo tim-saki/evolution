@@ -1,5 +1,10 @@
 WORLD_WIDTH = 100
 WORLD_HEIGHT = 30
+JUNGLE =
+  x: 45
+  y: 10
+  width: 10
+  height: 10
 DISP_EMPTY = "."
 DISP_PLANT = "*"
 
@@ -31,7 +36,13 @@ random_int = (min, max) ->
   min + Math.floor(Math.random() * max)
 
 add_plants = ->
-  pos = {x: random_int(0, WORLD_WIDTH), y: random_int(0, WORLD_HEIGHT)}
+  pos =
+    x: random_int(0, WORLD_WIDTH)
+    y: random_int(0, WORLD_HEIGHT)
+  world[[pos.x, pos.y]] = "plant"
+  pos =
+    x: random_int(JUNGLE.x, JUNGLE.width)
+    y: random_int(JUNGLE.y, JUNGLE.height)
   world[[pos.x, pos.y]] = "plant"
 
 window.onload = ->
