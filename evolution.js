@@ -38,9 +38,8 @@
   };
 
   update_world = function() {
-    var animal, _i, _len, _results;
+    var animal, _i, _j, _len, _len1, _results;
     add_plants();
-    _results = [];
     for (_i = 0, _len = animals.length; _i < _len; _i++) {
       animal = animals[_i];
       if (animal.energy <= 0) {
@@ -48,7 +47,16 @@
       }
       animal.eat();
       animal.turn();
-      _results.push(animal.move());
+      animal.move();
+    }
+    _results = [];
+    for (_j = 0, _len1 = animals.length; _j < _len1; _j++) {
+      animal = animals[_j];
+      if (200 <= animal.energy) {
+        _results.push(animal.reproduce());
+      } else {
+        _results.push(void 0);
+      }
     }
     return _results;
   };
@@ -87,7 +95,7 @@
   };
 
   random_int = function(min, max) {
-    return min + Math.floor(Math.random() * max);
+    return min + Math.floor(Math.random() * (max - min));
   };
 
   add_plants = function() {
@@ -98,8 +106,8 @@
     };
     plants[[pos.x, pos.y]] = true;
     pos = {
-      x: random_int(JUNGLE.x, JUNGLE.width),
-      y: random_int(JUNGLE.y, JUNGLE.height)
+      x: random_int(JUNGLE.x, JUNGLE.x + JUNGLE.width),
+      y: random_int(JUNGLE.y, JUNGLE.y + JUNGLE.height)
     };
     return plants[[pos.x, pos.y]] = true;
   };
@@ -195,6 +203,14 @@
         plants[[this.x, this.y]] = void 0;
         return this.energy += 80;
       }
+    };
+
+    Animal.prototype.reproduce = function() {
+      var child_genes;
+      this.energy = this.energy / 2;
+      child_genes = this.genes;
+      child_genes[random_int(0, 8)] += random_int(-1, 2);
+      return animals.push(new Animal(this.x, this.y, this.direction, child_genes, this.energy));
     };
 
     return Animal;

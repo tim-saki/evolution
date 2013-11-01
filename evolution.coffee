@@ -30,6 +30,9 @@ update_world = ->
     animal.eat()
     animal.turn()
     animal.move()
+  for animal in animals
+    if 200 <= animal.energy
+      animal.reproduce()
 
 draw_world = ->
   world = []
@@ -50,7 +53,7 @@ draw_world = ->
   $("world").innerHTML = ary.join('')
 
 random_int = (min, max) ->
-  min + Math.floor(Math.random() * max)
+  min + Math.floor(Math.random() * (max - min))
 
 add_plants = ->
   pos =
@@ -58,8 +61,8 @@ add_plants = ->
     y: random_int(0, WORLD_HEIGHT)
   plants[[pos.x, pos.y]] = true
   pos =
-    x: random_int(JUNGLE.x, JUNGLE.width)
-    y: random_int(JUNGLE.y, JUNGLE.height)
+    x: random_int(JUNGLE.x, JUNGLE.x + JUNGLE.width)
+    y: random_int(JUNGLE.y, JUNGLE.y + JUNGLE.height)
   plants[[pos.x, pos.y]] = true
 
 dist_x_by_dir =
@@ -121,6 +124,11 @@ class Animal
     if plants[[@x, @y]]
       plants[[@x, @y]] = undefined
       @energy += 80
+  reproduce: ->
+    @energy = @energy / 2
+    child_genes = @genes
+    child_genes[random_int(0, 8)] += random_int(-1, 2)
+    animals.push(new Animal(@x, @y, @direction, child_genes, @energy))
 
 window.onload = ->
   console.log "loaded"
