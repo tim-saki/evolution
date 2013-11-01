@@ -31,9 +31,12 @@
     return document.getElementById(id);
   };
 
-  skip_day = function() {
+  skip_day = function(days) {
+    var i, _i;
     console.log("skip day");
-    update_world();
+    for (i = _i = 0; 0 <= days ? _i < days : _i > days; i = 0 <= days ? ++_i : --_i) {
+      update_world();
+    }
     return draw_world();
   };
 
@@ -44,10 +47,11 @@
       animal = animals[_i];
       if (animal.energy <= 0) {
         animals.splice(animals.indexOf(animal), 1);
+      } else {
+        animal.eat();
+        animal.turn();
+        animal.move();
       }
-      animal.eat();
-      animal.turn();
-      animal.move();
     }
     _results = [];
     for (_j = 0, _len1 = animals.length; _j < _len1; _j++) {
@@ -218,7 +222,8 @@
   })();
 
   window.onload = function() {
-    var first_genes, i;
+    var first_genes, i,
+      _this = this;
     console.log("loaded");
     first_genes = (function() {
       var _i, _results;
@@ -230,7 +235,9 @@
     })();
     animals.push(new Animal(50, 15, 0, first_genes, ENERGY));
     draw_world();
-    return $("simulate_btn").addEventListener("click", skip_day);
+    return $("simulate_btn").addEventListener("click", function(e) {
+      return skip_day($("input_days").value);
+    });
   };
 
 }).call(this);

@@ -17,9 +17,10 @@ animals = []
 $ = (id) ->
   document.getElementById id
 
-skip_day = ->
+skip_day = (days) ->
   console.log "skip day"
-  update_world()
+  for i in [0...days]
+    update_world()
   draw_world()
 
 update_world = ->
@@ -27,9 +28,11 @@ update_world = ->
   for animal in animals
     if animal.energy <= 0
       animals.splice(animals.indexOf(animal), 1)
-    animal.eat()
-    animal.turn()
-    animal.move()
+    else
+      animal.eat()
+      animal.turn()
+      animal.move()
+
   for animal in animals
     if 200 <= animal.energy
       animal.reproduce()
@@ -135,4 +138,5 @@ window.onload = ->
   first_genes = (random_int(1, 10) for i in [0...8])
   animals.push(new Animal(50, 15, 0, first_genes, ENERGY))
   draw_world()
-  $("simulate_btn").addEventListener "click", skip_day
+  $("simulate_btn").addEventListener "click", (e) =>
+    skip_day($("input_days").value)
