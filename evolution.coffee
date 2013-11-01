@@ -24,6 +24,7 @@ skip_day = ->
 update_world = ->
   add_plants()
   for animal in animals
+    animal.turn()
     animal.move()
 
 draw_world = ->
@@ -76,8 +77,13 @@ dist_y_by_dir =
   6: 1
   7: 0
 
+sum_array = (ary) ->
+  sum = 0
+  sum += a for a in ary
+  sum
+
 class Animal
-  constructor: (@x, @y, @direction) ->
+  constructor: (@x, @y, @direction, @genes) ->
   move: ->
     @x += dist_x_by_dir[@direction]
     @y += dist_y_by_dir[@direction]
@@ -85,9 +91,31 @@ class Animal
     if WORLD_WIDTH <= @x then @x -= WORLD_WIDTH
     if @y < 0 then @y += WORLD_HEIGHT
     if WORLD_HEIGHT <= @y then @y -= WORLD_HEIGHT
+  turn: ->
+    thresholds = []
+    thresholds[i] = sum_array(@genes.slice(0, i+1)) for i in [0...8]
+    rand = random_int(0, thresholds[thresholds.length - 1])
+    @direction = -1
+    if rand <= thresholds[0]
+      @direction = 0
+    else if rand <= thresholds[1]
+      @direction = 1
+    else if rand <= thresholds[2]
+      @direction = 2
+    else if rand <= thresholds[3]
+      @direction = 3
+    else if rand <= thresholds[4]
+      @direction = 4
+    else if rand <= thresholds[5]
+      @direction = 5
+    else if rand <= thresholds[6]
+      @direction = 6
+    else if rand <= thresholds[7]
+      @direction = 7
 
 window.onload = ->
   console.log "loaded"
-  animals.push(new Animal(50, 15, 0))
+  first_genes = (random_int(1, 10) for i in [0...8])
+  animals.push(new Animal(50, 15, 0, first_genes))
   draw_world()
   $("simulate_btn").addEventListener "click", skip_day
