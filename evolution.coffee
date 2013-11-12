@@ -11,7 +11,6 @@ DISP_PLANT = "<span style='color: blue;'>*</span>"
 DISP_ANIMAL = "<span style='color: green;'>M︎</span>"
 DISP_ANIMAL_LOW = "<span style='color: red;'>M︎</span>"
 TIMER = undefined
-INTERVAL = 1000
 
 world = []
 plants = []
@@ -141,7 +140,7 @@ class Animal
 
 auto_simulate_handler = ->
   if $("input_auto").checked
-    TIMER = setInterval (-> skip_day($("input_days").value)), INTERVAL
+    TIMER = setInterval (-> skip_day($("input_days").value)), $("input_interval").value
   else
     clearInterval TIMER
 
