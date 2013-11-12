@@ -22,55 +22,75 @@ animals = []
 $ = (id) ->
   document.getElementById id
 
-skip_day = (days) ->
-  update_world() for i in [0...days]
-  draw_world()
+class Simulator
+  constructor: (
+    @input_days
+    @input_interval
+    @simulate_btn
+    @input_auto
+  ) ->
+    @add_events()
+    @draw_world()
 
-update_world = ->
-  add_plants()
+  skip_day: (days) ->
+    @update_world() for i in [0...days]
+    @draw_world()
 
-  for animal in animals when animal?
-    if animal.energy <= DEATH_THLD
-      animals.splice(animals.indexOf(animal), 1)
+  update_world: ->
+    @add_plants()
+    for animal in animals when animal?
+      if animal.energy <= DEATH_THLD
+        animals.splice(animals.indexOf(animal), 1)
+      else
+        animal.eat()
+        animal.turn()
+        animal.move()
+    animal.reproduce() for animal in animals when REPRODUCE_THLD <= animal.energy
+
+  draw_world: ->
+    world = []
+    for y in [0...WORLD_HEIGHT]
+      for x in [0...WORLD_WIDTH]
+        world[[x, y]] = "plant" if plants[[x, y]]
+    for animal in animals
+      world[[animal.x, animal.y]] = "animal_danger" if animal.energy <= DANGER_THLD
+      world[[animal.x, animal.y]] = "animal" if DANGER_THLD < animal.energy
+
+    ary = []
+    for y in [0...WORLD_HEIGHT]
+      for x in [0...WORLD_WIDTH]
+        switch world[[x, y]]
+          when "animal" then ary.push(DISP_ANIMAL)
+          when "animal_danger" then ary.push(DISP_ANIMAL_DANGER)
+          when "plant" then ary.push(DISP_PLANT)
+          else ary.push(DISP_EMPTY)
+      ary.push("\n")
+    $("world").innerHTML = ary.join('')
+
+  add_plants: ->
+    pos =
+      x: random_int(0, WORLD_WIDTH)
+      y: random_int(0, WORLD_HEIGHT)
+    plants[[pos.x, pos.y]] = true
+    pos =
+      x: random_int(JUNGLE.x, JUNGLE.x + JUNGLE.width)
+      y: random_int(JUNGLE.y, JUNGLE.y + JUNGLE.height)
+    plants[[pos.x, pos.y]] = true
+
+  auto_simulate_handler: ->
+    if $("input_auto").checked
+      TIMER = setInterval (=> @skip_day(@input_days.value)), $("input_interval").value
     else
-      animal.eat()
-      animal.turn()
-      animal.move()
+      clearInterval TIMER
 
-  animal.reproduce() for animal in animals when REPRODUCE_THLD <= animal.energy
-
-draw_world = ->
-  world = []
-  for y in [0...WORLD_HEIGHT]
-    for x in [0...WORLD_WIDTH]
-      world[[x, y]] = "plant" if plants[[x, y]]
-  for animal in animals
-    world[[animal.x, animal.y]] = "animal_danger" if animal.energy <= DANGER_THLD
-    world[[animal.x, animal.y]] = "animal" if DANGER_THLD < animal.energy
-
-  ary = []
-  for y in [0...WORLD_HEIGHT]
-    for x in [0...WORLD_WIDTH]
-      switch world[[x, y]]
-        when "animal" then ary.push(DISP_ANIMAL)
-        when "animal_danger" then ary.push(DISP_ANIMAL_DANGER)
-        when "plant" then ary.push(DISP_PLANT)
-        else ary.push(DISP_EMPTY)
-    ary.push("\n")
-  $("world").innerHTML = ary.join('')
+  add_events: ->
+    @simulate_btn.addEventListener "click", (e) =>
+      @skip_day @input_days.value
+    @input_auto.addEventListener "change", (e) =>
+      @auto_simulate_handler()
 
 random_int = (min, max) ->
   min + Math.floor(Math.random() * (max - min))
-
-add_plants = ->
-  pos =
-    x: random_int(0, WORLD_WIDTH)
-    y: random_int(0, WORLD_HEIGHT)
-  plants[[pos.x, pos.y]] = true
-  pos =
-    x: random_int(JUNGLE.x, JUNGLE.x + JUNGLE.width)
-    y: random_int(JUNGLE.y, JUNGLE.y + JUNGLE.height)
-  plants[[pos.x, pos.y]] = true
 
 dist_x_by_dir =
   0: -1
@@ -137,17 +157,12 @@ class Animal
     child_genes[random_int(0, 8)] += random_int(-1, 2)
     animals.push(new Animal(@x, @y, @direction, child_genes, @energy))
 
-auto_simulate_handler = ->
-  if $("input_auto").checked
-    TIMER = setInterval (-> skip_day($("input_days").value)), $("input_interval").value
-  else
-    clearInterval TIMER
-
 window.onload = ->
   first_genes = (random_int(1, 10) for i in [0...8])
   animals.push(new Animal(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0, first_genes, ENERGY))
-  draw_world()
-  $("simulate_btn").addEventListener "click", (e) =>
-    skip_day($("input_days").value)
-  $("input_auto").addEventListener "change", (e) =>
-    auto_simulate_handler()
+  new Simulator(
+    $('input_days')
+    $('input_interval')
+    $('simulate_btn')
+    $('input_auto')
+  )
